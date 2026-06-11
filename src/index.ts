@@ -50,6 +50,49 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 }).then(async (world) => {
   const { scene, camera, renderer } = world;
 
+  // ---- ページ内の「VRで入る」ボタン ----
+  const vrButton = document.createElement("button");
+  vrButton.textContent = "⚔ VRで入る";
+  Object.assign(vrButton.style, {
+    position: "fixed",
+    bottom: "28px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    padding: "16px 44px",
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#f3e9d2",
+    background: "rgba(40,24,10,0.85)",
+    border: "2px solid #c9a063",
+    borderRadius: "10px",
+    cursor: "pointer",
+    zIndex: "10",
+  });
+  vrButton.onclick = () => world.launchXR();
+  document.body.appendChild(vrButton);
+
+  renderer.xr.addEventListener("sessionstart", () => {
+    vrButton.style.display = "none";
+  });
+  renderer.xr.addEventListener("sessionend", () => {
+    vrButton.style.display = "";
+  });
+  if (navigator.xr) {
+    navigator.xr.isSessionSupported("immersive-vr").then((ok) => {
+      if (!ok) {
+        vrButton.textContent = "このブラウザはVR非対応（Quest Browserで開いてね）";
+        vrButton.disabled = true;
+        vrButton.style.cursor = "default";
+        vrButton.style.opacity = "0.7";
+      }
+    });
+  } else {
+    vrButton.textContent = "このブラウザはVR非対応（Quest Browserで開いてね）";
+    vrButton.disabled = true;
+    vrButton.style.cursor = "default";
+    vrButton.style.opacity = "0.7";
+  }
+
   // デスクトッププレビュー用の初期カメラ
   camera.position.set(0, 1.6, 0.5);
 
